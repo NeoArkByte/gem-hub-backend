@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: gem-hub-backend
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - ./.env:/.env:ro
+    ports:
+      - "5000:5000"
+    networks:
+      - supabase_network
+
+networks:
+  supabase_network:
+    external: true
+    name: supabase_default

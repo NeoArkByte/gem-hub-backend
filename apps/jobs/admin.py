@@ -8,11 +8,13 @@ class JobAdmin(admin.ModelAdmin):
         "job_id",
         "title",
         "employer_id",
-        "salary",
+        #"salary",
+        "min_salary",
+        "max_salary",
         "status",
         "created_at",
     )
-    search_fields = ("title", "employer_id", "salary", "status")
+    search_fields = ("title", "employer_id", "min_salary", "max_salary", "status")
     list_filter = ("status", "created_at")
     ordering = ("-created_at",)
     readonly_fields = ("created_at",)
