@@ -14,7 +14,16 @@ class Job(models.Model):
     employer = models.ForeignKey(Profile, on_delete=models.CASCADE)
     title = models.TextField()
     company_info = models.TextField(null=True, blank=True)
-    salary = models.FloatField(null=True, blank=True)
+
+    description = models.TextField(null=True, blank=True)
+
+    #salary = models.FloatField(null=True, blank=True)\
+    min_salary = models.FloatField(null=True, blank=True)
+    max_salary = models.FloatField(null=True, blank=True)
+
+    phone_number = models.CharField(max_length=20, null=True, blank=True)
+    whatsapp_number = models.CharField(max_length=20, null=True, blank=True)
+
     tags = models.TextField(null=True, blank=True)
     status = models.TextField(
         choices=JobStatus.choices, 
