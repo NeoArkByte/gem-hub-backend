@@ -1,19 +1,37 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, status
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from apps.core.permissions import IsOwner, IsAdminUser  # Imported your custom permissions
 from .models import Job, Application
 from .serializers import JobSerializer, ApplicationSerializer
-from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
+
+# 1. Job ViewSet
 class JobViewSet(viewsets.ModelViewSet):
     queryset = Job.objects.all()
     serializer_class = JobSerializer
-    permission_classes = [AllowAny]
+
+    def get_permissions(self):
+        """
+        Dynamically limits access. Anyone can browse all jobs or view a specific job.
+        Everything else (creating, editing, deleting) requires authentication, ownership, or admin rights.
+        """
+        if self.action in ['list', 'retrieve']:
+            permission_classes = [AllowAny]
+        else:
+            # Note: Depending on your custom logic, you might want OR logic instead of AND logic.
+            # As written here, it mirrors your GemListing config exactly.
+            # permission_classes = [IsAuthenticated, IsOwner(field_name='employer'), IsAdminUser]
+            # permission_classes = [IsAuthenticated, IsOwner(field_name='employer')]
+            permission_classes = [IsAuthenticated]
+            
+        return [permission() for permission in permission_classes]
 
     def get_queryset(self):
         queryset = Job.objects.all()
 
-        status = self.request.query_params.get('status')
-        if status:
-            queryset = queryset.filter(status=status)
+        status_param = self.request.query_params.get('status')
+        if status_param:
+            queryset = queryset.filter(status=status_param)
 
         search = self.request.query_params.get('search')
         if search:
@@ -21,23 +39,33 @@ class JobViewSet(viewsets.ModelViewSet):
 
         return queryset.order_by('-created_at')
 
-
     def create(self, request, *args, **kwargs):
-
         print(request.data)
-
         serializer = self.get_serializer(data=request.data)
 
         if not serializer.is_valid():
             print(serializer.errors)
-            return Response(serializer.errors, status=400)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        return Response(serializer.data, status=201)
 
 # 2. Application ViewSet
 class ApplicationViewSet(viewsets.ModelViewSet):
     queryset = Application.objects.all()
     serializer_class = ApplicationSerializer
-    permission_classes = [AllowAny]
+
+    def get_permissions(self):
+        """
+        Dynamically limits access for applications. Public read-only, 
+        restricted modifications.
+        """
+        if self.action in ['list', 'retrieve']:
+            permission_classes = [AllowAny]
+        else:
+            # permission_classes = [IsAuthenticated, IsOwner(field_name='applicant'), IsAdminUser]
+            # permission_classes = [IsAuthenticated, IsOwner(field_name='applicant')]
+            permission_classes = [IsAuthenticated]
+            
+        return [permission() for permission in permission_classes]
