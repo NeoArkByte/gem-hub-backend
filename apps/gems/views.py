@@ -27,11 +27,17 @@ class GemListingViewSet(viewsets.ModelViewSet):
         Dynamically limits access. Anyone can browse all gems or view a specific gem.
         Everything else (creating, editing, deleting) requires an authenticated token.
         """
+        
         if self.action in ['list', 'retrieve']:
             permission_classes = [AllowAny]
+        elif self.action == 'create':
+            permission_classes = [IsAuthenticated]
+        elif self.action in ['update', 'destroy']:
+            permission_classes = [IsAuthenticated, IsOwner(field_name='owner') | IsAdminUser]
+        elif self.action == 'partial_update':
+            permission_classes = [IsAuthenticated, IsAdminUser]
         else:
-            # permission_classes = [IsAuthenticated, IsOwner(field_name='owner'), IsAdminUser]
-            # permission_classes = [IsAuthenticated, IsOwner(field_name='owner')]
+            # Default fallback
             permission_classes = [IsAuthenticated]
             
         return [permission() for permission in permission_classes]

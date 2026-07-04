@@ -15,13 +15,16 @@ class JobViewSet(viewsets.ModelViewSet):
         Dynamically limits access. Anyone can browse all jobs or view a specific job.
         Everything else (creating, editing, deleting) requires authentication, ownership, or admin rights.
         """
+        
         if self.action in ['list', 'retrieve']:
             permission_classes = [AllowAny]
+        elif self.action == 'create':
+            permission_classes = [IsAuthenticated]
+        elif self.action in ['update', 'destroy']:
+            permission_classes = [IsAuthenticated, IsOwner(field_name='employer') | IsAdminUser]
+        elif self.action == 'partial_update':
+            permission_classes = [IsAuthenticated, IsAdminUser]
         else:
-            # Note: Depending on your custom logic, you might want OR logic instead of AND logic.
-            # As written here, it mirrors your GemListing config exactly.
-            # permission_classes = [IsAuthenticated, IsOwner(field_name='employer'), IsAdminUser]
-            # permission_classes = [IsAuthenticated, IsOwner(field_name='employer')]
             permission_classes = [IsAuthenticated]
             
         return [permission() for permission in permission_classes]
@@ -61,11 +64,16 @@ class ApplicationViewSet(viewsets.ModelViewSet):
         Dynamically limits access for applications. Public read-only, 
         restricted modifications.
         """
+
         if self.action in ['list', 'retrieve']:
             permission_classes = [AllowAny]
+        elif self.action == 'create':
+            permission_classes = [IsAuthenticated]
+        elif self.action in ['update', 'destroy']:
+            permission_classes = [IsAuthenticated, IsOwner(field_name='applicant') | IsAdminUser]
+        elif self.action == 'partial_update':
+            permission_classes = [IsAuthenticated, IsAdminUser]
         else:
-            # permission_classes = [IsAuthenticated, IsOwner(field_name='applicant'), IsAdminUser]
-            # permission_classes = [IsAuthenticated, IsOwner(field_name='applicant')]
             permission_classes = [IsAuthenticated]
             
         return [permission() for permission in permission_classes]
