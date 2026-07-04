@@ -9,7 +9,6 @@ from drf_spectacular.views import (
 urlpatterns = [
     # admin dashboard
     path("admin/", admin.site.urls),
-    
     # documentation
     path("api/v1/schema/", SpectacularAPIView.as_view(), name="schema"),
     path(
@@ -22,4 +21,6 @@ urlpatterns = [
     ),
     # rest endpoints
     path("api/v1/", include("apps.gems.urls")),
+    path("api/v1/", include("apps.core.urls")),
+    path("api/v1/", include("apps.jobs.urls")),
 ]
