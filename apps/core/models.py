@@ -31,6 +31,8 @@ class Profile(models.Model):
     role = models.CharField(max_length=10, choices=Role.choices, default=Role.USER)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    has_backup = models.BooleanField(default=False)
+
 
     class Meta:
         db_table = "profiles"
